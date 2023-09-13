@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { registerNewUser } from '../../service/userService'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -27,14 +27,19 @@ export default function Register() {
     const [sex, setSex] = useState("Male");
     const [valid, setValid] = useState(defaultValidInput)
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (defaultValidInput.emailValid && defaultValidInput.passwordValid && defaultValidInput.rePasswordValid &&
             defaultValidInput.usernameValid && defaultValidInput.addressValid && defaultValidInput.phoneValid) {
-            if (password, email, rePassword, username, address, phone) {
-                axios.post('http://localhost:8080/api/v1/register', {
-                    email, password, username, address, phone, sex
-                })
-                navigate('/login')
+            if (password && email && rePassword && username && address && phone) {
+                let res = await registerNewUser(email, password, username, address, phone, sex)
+                let data = res.data
+                console.log(data.EC);
+                if (+data.EC === 0) {
+                    toast.success(data.EM)
+                    navigate('/login')
+                } else {
+                    toast.error(data.EM)
+                }
             }
         }
     }
@@ -119,13 +124,13 @@ export default function Register() {
         setValid({ ...valid, [key]: true });
     }
 
-    useEffect(() => {
-        // axios.get('http://localhost:8080/api/v1/test-api')
-        //     .then(data => console.log(data))
-        axios.post('http://localhost:8080/api/v1/register', {
-            email, password, username, address, phone, sex
-        })
-    }, [])
+    // useEffect(() => {
+    //     // axios.get('http://localhost:8080/api/v1/test-api')
+    //     //     .then(data => console.log(data))
+    //     axios.post('http://localhost:8080/api/v1/register', {
+    //         email, password, username, address, phone, sex
+    //     })
+    // }, [])
 
     return (
         <div className='container pt-5' >
