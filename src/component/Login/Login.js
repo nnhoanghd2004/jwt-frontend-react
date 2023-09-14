@@ -11,7 +11,8 @@ export default function Login() {
     const [password, setPassword] = useState("")
 
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
+        console.log("check0");
         if (!account) {
             toast.error("Please enter email address or number phone")
             return
@@ -21,8 +22,14 @@ export default function Login() {
             return
         }
 
-        let res = loginUser(account, password)
-        console.log(res);
+        let res = await loginUser(account, password)
+        if (+res.data.EC === 0) {
+            toast.success(res.data.EM)
+            return
+        } else {
+            toast.error(res.data.EM)
+            return
+        }
     }
 
     return (
