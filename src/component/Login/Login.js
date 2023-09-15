@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -9,6 +9,13 @@ export default function Login() {
     const navigate = useNavigate();
     const [account, setAccount] = useState("")
     const [password, setPassword] = useState("")
+
+    useEffect(() => {
+        let checkLogin = sessionStorage.getItem('account');
+        if (checkLogin) {
+            navigate('/users')
+        }
+    }, [])
 
 
     const handleLogin = async () => {
@@ -25,6 +32,11 @@ export default function Login() {
         let res = await loginUser(account, password)
         if (+res.data.EC === 0) {
             toast.success(res.data.EM)
+            sessionStorage.setItem("account", JSON.stringify({
+                isAuthenticate: true,
+            }))
+            navigate('/users')
+            window.location.reload()
             return
         } else {
             toast.error(res.data.EM)
@@ -35,8 +47,8 @@ export default function Login() {
     return (
         <div className='container pt-5' >
             <div className='row'>
-                <div className='col-4'></div>
-                <div className='col-4 rounded' style={{ backgroundColor: "white" }}>
+                <div className='col-md-2 col-lg-3 col-xl-4'></div>
+                <div className='col-sm-12 col-md-8 col-lg-6 col-xl-4 rounded' style={{ backgroundColor: "white" }}>
                     <div className='d-flex justify-content-center mt-3'>
                         <h2 className='d-flex '>Hoang</h2>
                     </div>
