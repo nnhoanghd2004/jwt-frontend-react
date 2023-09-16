@@ -17,9 +17,7 @@ export default function Login() {
         }
     }, [])
 
-
     const handleLogin = async () => {
-        console.log("check0");
         if (!account) {
             toast.error("Please enter email address or number phone")
             return
@@ -37,13 +35,14 @@ export default function Login() {
             }))
             navigate('/users')
             window.location.reload()
-            return
         } else {
             toast.error(res.data.EM)
-            return
         }
     }
 
+    const handleEnterLogin = (e) => {
+        if (e.keyCode === 13) handleLogin();
+    }
     return (
         <div className='container pt-5' >
             <div className='row'>
@@ -72,6 +71,7 @@ export default function Login() {
                                 placeholder='Password'
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={(e) => handleEnterLogin(e)}
                             />
                         </div>
 

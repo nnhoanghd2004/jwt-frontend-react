@@ -1,19 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 const Users = () => {
-    const navigate = useNavigate();
-    useEffect(() => {
-        let checkLogin = sessionStorage.getItem('account');
-        if (!checkLogin) {
-            navigate('/login')
-        }
-    }, [])
     return (
-        <div>
+        <div className='users'>
             users component
         </div>
     );
 };
-
 export default Users;
