@@ -12,7 +12,7 @@ function Nav() {
         if (checkLogin) {
             setAccount(JSON.parse(checkLogin))
         }
-    }, [account])
+    }, [])
     return (
         <>
             {account && !_.isEmpty(account) && account.isAuthenticate && (

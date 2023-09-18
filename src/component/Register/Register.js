@@ -24,7 +24,7 @@ export default function Register() {
     const [username, setUsername] = useState("");
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
-    const [sex, setSex] = useState("Male");
+    const [sex, setSex] = useState(1);
     const [valid, setValid] = useState(defaultValidInput)
 
     const handleSubmit = async () => {
@@ -180,11 +180,11 @@ export default function Register() {
                         <div>Sex</div>
                         <div className="input-group">
                             <div className="input-group-text">
-                                <input className="mt-0" type="radio" name='sex' defaultChecked onClick={() => setSex("Male")} />
+                                <input className="mt-0" type="radio" name='sex' defaultChecked onClick={() => setSex(1)} />
                             </div>
                             <input type="text" className="form-control" defaultValue="Male" />
                             <div className="input-group-text">
-                                <input className="mt-0" type="radio" name='sex' onClick={() => setSex("Female")} />
+                                <input className="mt-0" type="radio" name='sex' onClick={() => setSex(0)} />
                             </div>
                             <input type="text" className="form-control" defaultValue="Female" />
                         </div>

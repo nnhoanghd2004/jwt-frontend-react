@@ -12,6 +12,10 @@ const loginUser = (account, password) => {
     })
 }
 
+const allUser = (page) => {
+    return axios.get(`http://localhost:8080/api/v1/user/read?page=${page}&limit=5`)
+}
+
 export {
-    registerNewUser, loginUser
+    registerNewUser, loginUser, allUser
 }
