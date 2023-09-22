@@ -3,7 +3,7 @@ import Nav from "./component/Navigation/Nav";
 import AppRoutes from "./routes/AppRoutes";
 
 import { ToastContainer } from "react-toastify";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 
 function App() {

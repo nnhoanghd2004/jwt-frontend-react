@@ -13,9 +13,13 @@ const loginUser = (account, password) => {
 }
 
 const allUser = (page) => {
-    return axios.get(`http://localhost:8080/api/v1/user/read?page=${page}&limit=5`)
+    return axios.get(`http://localhost:8080/api/v1/user/read?page=${page}&limit=3`)
+}
+
+const deleteUser = (id) => {
+    return axios.delete('http://localhost:8080/api/v1/user/delete', {data: {id}})
 }
 
 export {
-    registerNewUser, loginUser, allUser
+    registerNewUser, loginUser, allUser, deleteUser
 }

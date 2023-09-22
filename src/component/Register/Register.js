@@ -1,8 +1,8 @@
 import React from 'react'
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { registerNewUser } from '../../service/userService'
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Register() {
