@@ -6,14 +6,10 @@ const PrivateRoutes = ({ children }) => {
     useEffect(() => {
         let checkLogin = sessionStorage.getItem('account');
         if (!checkLogin) {
-            navigate('/login')
+            navigate('/login');
         }
-    }, [])
-    return (
-        <div>
-            {children}
-        </div>
-    );
+    }, [navigate]);
+    return <div>{children}</div>;
 };
 
 export default PrivateRoutes;
