@@ -1,12 +1,13 @@
 import Modal from 'react-bootstrap/Modal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { getGroup } from '../../service/userService';
 
 function ModalUser(props) {
     const lowerCaseLetters = /[a-z]/g;
     const upperCaseLetters = /[A-Z]/g;
     const numbers = /[0-9]/g;
-    // const phoneValidate = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
+
     let defaultValidInput = {
         emailValid: true,
         passwordValid: true,
@@ -14,20 +15,15 @@ function ModalUser(props) {
         addressValid: true,
         phoneValid: true,
     };
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('');
-    const [address, setAddress] = useState('');
-    const [phone, setPhone] = useState('');
-    const [sex, setSex] = useState('Male');
-    const [group, setGroup] = useState('');
+    const [dataUser, setDataUser] = useState({});
     const [valid, setValid] = useState(defaultValidInput);
+    const [groups, setGroups] = useState([]);
 
     const handleSubmit = () => {
         let groupSubmit;
-        if (!group) groupSubmit = props.allGroup[0].name;
-        else groupSubmit = group;
-        props.allGroup.map((value) => {
+        if (!dataUser.Group) groupSubmit = groups[0].name;
+        else groupSubmit = dataUser.Group;
+        groups.forEach((value) => {
             if (groupSubmit === value.name) groupSubmit = value.id;
         });
         if (
@@ -37,20 +33,60 @@ function ModalUser(props) {
             defaultValidInput.addressValid &&
             defaultValidInput.phoneValid
         ) {
-            if (password && email && username && address && phone) {
-                props.handleCreate(email, password, username, address, phone, sex, groupSubmit);
+            if (dataUser.username && dataUser.address && dataUser.phone) {
+                if (props.title === 'Edit User') {
+                    props.handleEdit(
+                        dataUser.id,
+                        dataUser.username,
+                        dataUser.address,
+                        dataUser.phone,
+                        dataUser.sex,
+                        groupSubmit,
+                    );
+                    setDataUser({});
+                } else {
+                    props.handleCreate(
+                        dataUser.email,
+                        dataUser.password,
+                        dataUser.username,
+                        dataUser.address,
+                        dataUser.phone,
+                        dataUser.sex,
+                        groupSubmit,
+                    );
+                    setDataUser({});
+                }
             }
+        }
+    };
+
+    const validateInput = (type) => {
+        switch (type) {
+            case 'email':
+                validateEmail();
+                break;
+            case 'password':
+                validatePassword();
+                break;
+            case 'username':
+                validateUsername();
+                break;
+            case 'phone':
+                validatePhone();
+                break;
+            default:
+                break;
         }
     };
 
     const validateEmail = () => {
         const reg = /^[\w.-]+@[a-zA-Z_-]+?\.[a-zA-Z]{2,}$/;
-        if (!email) {
+        if (!dataUser.email) {
             toast.error('Your email is empty');
             setValid({ ...valid, emailValid: false });
             return;
         }
-        if (!reg.test(email)) {
+        if (!reg.test(dataUser.email)) {
             toast.error('Invalid email');
             valid.emailValid = false;
             setValid({ ...valid, emailValid: false });
@@ -59,19 +95,19 @@ function ModalUser(props) {
         setValid({ ...valid, emailValid: true });
     };
     const validatePassword = () => {
-        if (!password) {
+        if (!dataUser.password) {
             toast.error('Your password is empty');
             setValid({ ...valid, passwordValid: false });
             return;
         }
-        if (password.length > 8) {
-            if (!password.match(lowerCaseLetters)) {
+        if (dataUser.password.length > 8) {
+            if (!dataUser.password.match(lowerCaseLetters)) {
                 toast.error('Your password requires lowercase letters');
                 setValid({ ...valid, passwordValid: false });
-            } else if (!password.match(upperCaseLetters)) {
+            } else if (!dataUser.password.match(upperCaseLetters)) {
                 toast.error('Your password requires uppercase letters');
                 setValid({ ...valid, passwordValid: false });
-            } else if (!password.match(numbers)) {
+            } else if (!dataUser.password.match(numbers)) {
                 toast.error('Your password requires numbers');
                 setValid({ ...valid, passwordValid: false });
             }
@@ -82,7 +118,7 @@ function ModalUser(props) {
         setValid({ ...valid, passwordValid: true });
     };
     const validateUsername = () => {
-        if (!username) {
+        if (!dataUser.username) {
             toast.error('Your username is empty');
             setValid({ ...valid, usernameValid: false });
             return;
@@ -90,7 +126,7 @@ function ModalUser(props) {
         setValid({ ...valid, usernameValid: true });
     };
     const validateAddress = () => {
-        if (!address) {
+        if (!dataUser.address) {
             toast.error('Your address is empty');
             setValid({ ...valid, addressValid: false });
             return;
@@ -98,7 +134,7 @@ function ModalUser(props) {
         setValid({ ...valid, addressValid: true });
     };
     const validatePhone = () => {
-        if (!phone) {
+        if (!dataUser.phone) {
             toast.error('Your phone is empty');
             setValid({ ...valid, phoneValid: false });
             return;
@@ -106,10 +142,23 @@ function ModalUser(props) {
         setValid({ ...valid, phoneValid: true });
     };
 
+    const getAllGroup = async () => {
+        let data = await getGroup();
+        setGroups(data.data.DT);
+    };
+
     const handleClick = (id) => {
         const key = id + 'Valid';
         setValid({ ...valid, [key]: true });
     };
+
+    useEffect(() => {
+        setDataUser(props.dataUser);
+    }, [props.dataUser]);
+
+    useEffect(() => {
+        getAllGroup();
+    }, []);
 
     return (
         <>
@@ -139,14 +188,57 @@ function ModalUser(props) {
                                         type="email"
                                         id="email"
                                         placeholder="Email address"
-                                        defaultValue={email}
+                                        defaultValue={dataUser.email}
                                         className={'form-control py-3'}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        onBlur={() => validateEmail()}
+                                        onChange={(e) => {
+                                            setDataUser({ ...dataUser, email: e.target.value });
+                                        }}
+                                        // onBlur={() => validateEmail()}
                                     />
                                 )}
                             </div>
 
+                            <div className="form-outline my-1 col-6">
+                                {props.title === 'Edit User' ? (
+                                    <>
+                                        <label className="mb-1" htmlFor="phone">
+                                            Phone Number:
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="phone"
+                                            placeholder="Phone"
+                                            defaultValue={props.dataUser.phone}
+                                            className={
+                                                valid.phoneValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
+                                            }
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, phone: e.target.value });
+                                            }}
+                                            // onBlur={() => validatePhone()}
+                                            onClick={(e) => handleClick(e.target.id)}
+                                            disabled
+                                        />
+                                    </>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        id="phone"
+                                        placeholder="Phone"
+                                        defaultValue={dataUser.phone}
+                                        className={
+                                            valid.phoneValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
+                                        }
+                                        onChange={(e) => {
+                                            setDataUser({ ...dataUser, phone: e.target.value });
+                                        }}
+                                        // onBlur={() => validatePhone()}
+                                        onClick={(e) => handleClick(e.target.id)}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <div className="row">
                             <div className="form-outline my-1 col-6">
                                 {props.title === 'Edit User' ? (
                                     <>
@@ -163,7 +255,9 @@ function ModalUser(props) {
                                                     ? 'form-control py-3'
                                                     : 'form-control py-3 is-invalid'
                                             }
-                                            onChange={(e) => setUsername(e.target.value)}
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, username: e.target.value });
+                                            }}
                                             onBlur={() => validateUsername()}
                                             onClick={(e) => handleClick(e.target.id)}
                                         />
@@ -177,67 +271,34 @@ function ModalUser(props) {
                                         className={
                                             valid.usernameValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
                                         }
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => {
+                                            setDataUser({ ...dataUser, username: e.target.value });
+                                        }}
                                         onBlur={() => validateUsername()}
                                         onClick={(e) => handleClick(e.target.id)}
                                     />
                                 )}
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="form-outline my-1 col-6">
-                                {props.title === 'Edit User' && (
-                                    <label className="mb-1" htmlFor="password">
-                                        Password:
-                                    </label>
-                                )}
-                                <input
-                                    type="password"
-                                    id="password"
-                                    placeholder="Password"
-                                    defaultValue={password}
-                                    className={
-                                        valid.passwordValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
-                                    }
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    onBlur={() => validatePassword()}
-                                    onClick={(e) => handleClick(e.target.id)}
-                                />
-                            </div>
-                            <div className="form-outline my-1 col-6">
-                                {props.title === 'Edit User' ? (
-                                    <>
-                                        <label className="mb-1" htmlFor="phone">
-                                            Phone Number:
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="phone"
-                                            placeholder="Phone"
-                                            defaultValue={props.dataUser.phone}
-                                            className={
-                                                valid.phoneValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
-                                            }
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            onBlur={() => validatePhone()}
-                                            onClick={(e) => handleClick(e.target.id)}
-                                        />
-                                    </>
-                                ) : (
+
+                            {props.title === 'Edit User' ? (
+                                <></>
+                            ) : (
+                                <div className="form-outline my-1 col-6">
                                     <input
-                                        type="text"
-                                        id="phone"
-                                        placeholder="Phone"
-                                        defaultValue={phone}
+                                        type="password"
+                                        id="password"
+                                        placeholder="Password"
                                         className={
-                                            valid.phoneValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
+                                            valid.passwordValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
                                         }
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        onBlur={() => validatePhone()}
+                                        onChange={(e) => {
+                                            setDataUser({ ...dataUser, password: e.target.value });
+                                        }}
+                                        onBlur={() => validateInput('password')}
                                         onClick={(e) => handleClick(e.target.id)}
                                     />
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-outline my-1">
@@ -250,11 +311,13 @@ function ModalUser(props) {
                                         type="text"
                                         id="address"
                                         placeholder="Address"
-                                        defaultValue={address}
+                                        defaultValue={dataUser.address}
                                         className={
                                             valid.addressValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
                                         }
-                                        onChange={(e) => setAddress(e.target.value)}
+                                        onChange={(e) => {
+                                            setDataUser({ ...dataUser, address: e.target.value });
+                                        }}
                                         onBlur={() => validateAddress()}
                                         onClick={(e) => handleClick(e.target.id)}
                                     />
@@ -264,11 +327,13 @@ function ModalUser(props) {
                                     type="text"
                                     id="address"
                                     placeholder="Address"
-                                    defaultValue={address}
+                                    defaultValue={dataUser.address}
                                     className={
                                         valid.addressValid ? 'form-control py-3' : 'form-control py-3 is-invalid'
                                     }
-                                    onChange={(e) => setAddress(e.target.value)}
+                                    onChange={(e) => {
+                                        setDataUser({ ...dataUser, address: e.target.value });
+                                    }}
                                     onBlur={() => validateAddress()}
                                     onClick={(e) => handleClick(e.target.id)}
                                 />
@@ -281,8 +346,10 @@ function ModalUser(props) {
                                         <select
                                             className="form-select"
                                             aria-label="Default select example"
-                                            defaultValue={props.dataUser.sex}
-                                            onChange={(e) => setSex(e.target.value)}
+                                            value={dataUser.sex}
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, sex: e.target.value });
+                                            }}
                                         >
                                             <option>Male</option>
                                             <option>Female</option>
@@ -291,12 +358,14 @@ function ModalUser(props) {
                                     </div>
                                     <div className="form-outline my-1 col-6">
                                         <select
-                                            defaultValue={props.allGroup[props.dataUser.group - 1]}
+                                            value={dataUser.Group}
                                             className="form-select"
                                             aria-label="Default select example"
-                                            onChange={(e) => setGroup(e.target.value)}
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, Group: e.target.value });
+                                            }}
                                         >
-                                            {props.allGroup.map((value, index) => {
+                                            {groups.map((value, index) => {
                                                 return <option>{value.name}</option>;
                                             })}
                                         </select>
@@ -308,8 +377,10 @@ function ModalUser(props) {
                                         <select
                                             className="form-select"
                                             aria-label="Default select example"
-                                            defaultValue={sex}
-                                            onChange={(e) => setSex(e.target.value)}
+                                            value={dataUser.sex}
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, sex: e.target.value });
+                                            }}
                                         >
                                             <option>Male</option>
                                             <option>Female</option>
@@ -318,13 +389,19 @@ function ModalUser(props) {
                                     </div>
                                     <div className="form-outline my-1 col-6">
                                         <select
-                                            defaultValue={group}
+                                            value={dataUser.Group}
                                             className="form-select"
                                             aria-label="Default select example"
-                                            onChange={(e) => setGroup(e.target.value)}
+                                            onChange={(e) => {
+                                                setDataUser({ ...dataUser, Group: e.target.value });
+                                            }}
                                         >
-                                            {props.allGroup.map((value, index) => {
-                                                return <option>{value.name}</option>;
+                                            {groups.map((value, index) => {
+                                                return (
+                                                    <option key={`option ${dataUser.Group + ' ' + index} `}>
+                                                        {value.name}
+                                                    </option>
+                                                );
                                             })}
                                         </select>
                                     </div>
@@ -334,13 +411,14 @@ function ModalUser(props) {
                         <div className="row mt-3 d-flex justify-content-around">
                             <button
                                 type="button"
-                                className="btn btn-success btn-block mb-4 col-5"
+                                className="btn btn-success  mb-4 col-5"
                                 onClick={() => handleSubmit()}
                             >
                                 {props.title === 'Create New User' ? 'Create' : 'Save'}
                             </button>
                             <button
-                                className="btn btn-secondary btn-block mb-4 col-5"
+                                type="button"
+                                className="btn btn-secondary  mb-4 col-5"
                                 onClick={() => {
                                     setValid(defaultValidInput);
                                     props.handleClose();

@@ -4,7 +4,7 @@ import ModalDelete from './ModalDelete';
 import { toast } from 'react-toastify';
 
 import ModalUser from './ModalUser';
-import { allUser, deleteUser, createUser, getGroup } from '../../service/userService';
+import { allUser, deleteUser, createUser, updateUser } from '../../service/userService';
 
 const Users = () => {
     const defaultDataUser = {
@@ -14,7 +14,7 @@ const Users = () => {
         address: '',
         phone: '',
         sex: '',
-        group: '',
+        Group: '',
     };
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,10 +24,9 @@ const Users = () => {
     const [showModelUser, setShowModelUser] = useState(false);
     const [dataUser, setDataUser] = useState({});
     const [titleModalUser, setTitleModalUser] = useState('');
-    const [groups, setGroups] = useState([]);
 
-    const handleRefesh = (e) => {
-        setCurrentPage(+e.selected + 1);
+    const handleRefesh = () => {
+        setTotalRow(totalRow + 1);
     };
     const handlePageClick = (e) => {
         setCurrentPage(+e.selected + 1);
@@ -49,19 +48,15 @@ const Users = () => {
     };
 
     const handleCloseUser = () => {
-        setShowModelUser(false);
         setDataUser({});
+        setShowModelUser(false);
     };
     const handleOpenUser = (dataUser) => {
-        // console.log(dataUser);
-        getAllGroup();
         setDataUser(dataUser);
         setShowModelUser(true);
     };
-    const handleCreateNewUser = async (email, password, username, address, phone, sex, group) => {
-        // console.log(email, password, username, address, phone, sex, group);
+    const handleConfirm = async (email, password, username, address, phone, sex, group) => {
         let data = await createUser(email, password, username, address, phone, sex, group);
-        console.log(data);
         if (data && data.data && +data.data.EC === 0) {
             toast.success(data.data.EM);
         } else {
@@ -71,16 +66,25 @@ const Users = () => {
         setTotalRow(totalRow - 1);
     };
 
-    const getAllGroup = async () => {
-        let data = await getGroup();
-        setGroups(data.data.DT);
+    const handleEditUser = async (id, username, address, phone, sex, group) => {
+        let data = await updateUser(id, username, address, phone, sex, group);
+        if (data && data.data && +data.data.EC === 0) {
+            toast.success(data.data.EM);
+        } else {
+            toast.error(data.data.EM);
+        }
+        setShowModelUser(false);
+        setTotalRow(totalRow - 1);
     };
 
     useEffect(() => {
         async function fetchData() {
-            console.log('count');
             let data = await allUser(currentPage);
-            setUsers(data.data.DT.users);
+            let user = data.data.DT.users.reduce((accum, val) => {
+                accum.push({ ...val, Group: val.Group.name });
+                return accum;
+            }, []);
+            setUsers(user);
             setTotalPage(data.data.DT.totalPages);
             setTotalRow(data.data.DT.totalRows);
         }
@@ -91,8 +95,9 @@ const Users = () => {
         <>
             <div className="container">
                 <div className="mb-3">
-                    <h3>All Users</h3>
+                    <h3 className="py-3">All Users</h3>
                     <button className="btn btn-success" onClick={() => handleRefesh()}>
+                        <i className="fa fa-refresh me-2"></i>
                         Refesh
                     </button>
                     <button
@@ -102,6 +107,7 @@ const Users = () => {
                             handleOpenUser(defaultDataUser);
                         }}
                     >
+                        <i className="fa fa-plus me-2"></i>
                         Add new user
                     </button>
                 </div>
@@ -109,6 +115,7 @@ const Users = () => {
                     <table className="table table-hover table-bordered rounded overflow-hidden">
                         <thead>
                             <tr>
+                                <th scope="col">No</th>
                                 <th scope="col">ID</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Username</th>
@@ -123,28 +130,30 @@ const Users = () => {
                             {users.map((value, index) => {
                                 return (
                                     <tr key={`row-${index}`}>
-                                        <th scope="row">{value.id}</th>
+                                        <th scope="row">{(currentPage - 1) * 3 + index + 1}</th>
+
+                                        <td>{value.id}</td>
                                         <td>{value.email}</td>
                                         <td>{value.username}</td>
                                         <td>{value.address}</td>
                                         <td>{value.sex}</td>
                                         <td>{value.phone}</td>
-                                        <td>{value.Group ? value.Group.name : ''}</td>
+                                        <td>{value.Group}</td>
                                         <div>
                                             <button
-                                                className="btn btn-warning mx-3"
+                                                className="btn btn-warning me-3"
                                                 onClick={() => {
                                                     setTitleModalUser('Edit User');
                                                     handleOpenUser(value);
                                                 }}
                                             >
-                                                Edit
+                                                <i className="fa fa-pencil-square-o"></i>
                                             </button>
                                             <button
                                                 className="btn btn-danger"
                                                 onClick={() => handleOpenDeleteUser(value)}
                                             >
-                                                Delete
+                                                <i className="fa fa-trash"></i>
                                             </button>
                                         </div>
                                     </tr>
@@ -178,17 +187,17 @@ const Users = () => {
             </div>
             <ModalDelete
                 show={showModelDeleteUser}
+                dataUser={dataUser}
                 handleClose={handleCloseDeleteUser}
                 handleDelete={handleDelete}
-                dataUser={dataUser}
             />
             <ModalUser
                 show={showModelUser}
-                handleClose={handleCloseUser}
-                handleCreate={handleCreateNewUser}
                 title={titleModalUser}
                 dataUser={dataUser}
-                allGroup={groups}
+                handleClose={handleCloseUser}
+                handleCreate={handleConfirm}
+                handleEdit={handleEditUser}
             />
         </>
     );

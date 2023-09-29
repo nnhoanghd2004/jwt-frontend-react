@@ -38,8 +38,19 @@ const createUser = (email, password, username, address, phone, sex, group) => {
     });
 };
 
+const updateUser = (id, username, address, phone, sex, group) => {
+    return axios.put('http://localhost:8080/api/v1/user/update', {
+        id,
+        username,
+        address,
+        phone,
+        sex,
+        group,
+    });
+};
+
 const getGroup = () => {
     return axios.get('http://localhost:8080/api/v1/group/read');
 };
 
-export { registerNewUser, loginUser, allUser, deleteUser, createUser, getGroup };
+export { registerNewUser, loginUser, allUser, deleteUser, createUser, getGroup, updateUser };
