@@ -144,7 +144,7 @@ function ModalUser(props) {
 
     const getAllGroup = async () => {
         let data = await getGroup();
-        setGroups(data.data.DT);
+        setGroups(data.DT);
     };
 
     const handleClick = (id) => {

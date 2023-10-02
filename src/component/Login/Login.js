@@ -27,8 +27,8 @@ export default function Login() {
         }
 
         let res = await loginUser(account, password);
-        if (+res.data.EC === 0) {
-            toast.success(res.data.EM);
+        if (+res.EC === 0) {
+            toast.success(res.EM);
             sessionStorage.setItem(
                 'account',
                 JSON.stringify({
@@ -38,7 +38,7 @@ export default function Login() {
             navigate('/users');
             window.location.reload();
         } else {
-            toast.error(res.data.EM);
+            toast.error(res.EM);
         }
     };
 

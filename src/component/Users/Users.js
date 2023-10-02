@@ -57,10 +57,10 @@ const Users = () => {
     };
     const handleConfirm = async (email, password, username, address, phone, sex, group) => {
         let data = await createUser(email, password, username, address, phone, sex, group);
-        if (data && data.data && +data.data.EC === 0) {
-            toast.success(data.data.EM);
+        if (data && +data.EC === 0) {
+            toast.success(data.EM);
         } else {
-            toast.error(data.data.EM);
+            toast.error(data.EM);
         }
         setShowModelUser(false);
         setTotalRow(totalRow - 1);
@@ -68,10 +68,10 @@ const Users = () => {
 
     const handleEditUser = async (id, username, address, phone, sex, group) => {
         let data = await updateUser(id, username, address, phone, sex, group);
-        if (data && data.data && +data.data.EC === 0) {
-            toast.success(data.data.EM);
+        if (data && +data.EC === 0) {
+            toast.success(data.EM);
         } else {
-            toast.error(data.data.EM);
+            toast.error(data.EM);
         }
         setShowModelUser(false);
         setTotalRow(totalRow - 1);
@@ -80,13 +80,13 @@ const Users = () => {
     useEffect(() => {
         async function fetchData() {
             let data = await allUser(currentPage);
-            let user = data.data.DT.users.reduce((accum, val) => {
+            let user = data.DT.users.reduce((accum, val) => {
                 accum.push({ ...val, Group: val.Group.name });
                 return accum;
             }, []);
             setUsers(user);
-            setTotalPage(data.data.DT.totalPages);
-            setTotalRow(data.data.DT.totalRows);
+            setTotalPage(data.DT.totalPages);
+            setTotalRow(data.DT.totalRows);
         }
         fetchData();
     }, [currentPage, totalRow]);
