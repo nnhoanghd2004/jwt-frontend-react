@@ -27,7 +27,7 @@ export default function Register() {
     const [username, setUsername] = useState('');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
-    const [sex, setSex] = useState('');
+    const [sex, setSex] = useState('Male');
     const [valid, setValid] = useState(defaultValidInput);
 
     const handleSubmit = async () => {
@@ -40,9 +40,7 @@ export default function Register() {
             defaultValidInput.phoneValid
         ) {
             if (password && email && rePassword && username && address && phone) {
-                let res = await registerNewUser(email, password, username, address, phone, sex);
-                let data = res.data;
-                console.log(data.EC);
+                let data = await registerNewUser(email, password, username, address, phone, sex);
                 if (+data.EC === 0) {
                     toast.success(data.EM);
                     navigate('/login');
